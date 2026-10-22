@@ -1,0 +1,32 @@
+databases:
+  - name: vigil-db
+    databaseName: vigil
+    user: vigil_user
+    plan: basic-256mb
+
+services:
+  - type: pserv
+    name: vigil-nats
+    runtime: image
+    image:
+      url: docker.io/library/nats:2.10-alpine
+    startCommand: "-m 8222 -js"
+
+  - type: web
+    name: vigil-risk-engine
+    runtime: docker
+    dockerfilePath: ./services/risk-engine/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vigil-db
+          property: connectionString
+      - key: NATS_URL
+        fromService:
+          name: vigil-nats
+          type: pserv
+          property: hostport
+      - key: HTTP_PORT
+        value: "8080"

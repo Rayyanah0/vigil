@@ -19,3 +19,14 @@ CREATE TABLE IF NOT EXISTS cursor_history (
 
 CREATE INDEX IF NOT EXISTS idx_cursor_history_status ON cursor_history(status);
 CREATE INDEX IF NOT EXISTS idx_cursor_history_number ON cursor_history(block_number);
+
+-- Recent event payloads are retained so the indexer can publish retractions after a reorg.
+CREATE TABLE IF NOT EXISTS indexer_block_logs (
+    block_number BIGINT NOT NULL,
+    block_hash   TEXT NOT NULL,
+    log_index    BIGINT NOT NULL,
+    message      JSONB NOT NULL,
+    PRIMARY KEY (block_hash, log_index)
+);
+
+CREATE INDEX IF NOT EXISTS indexer_block_logs_number ON indexer_block_logs (block_number);

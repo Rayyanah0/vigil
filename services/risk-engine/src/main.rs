@@ -44,6 +44,11 @@ async fn main() -> Result<()> {
         .await
         .context("Failed to connect to Postgres")?;
     info!("Connected to Postgres database");
+    sqlx::migrate!("../../migrations")
+        .run(&pool)
+        .await
+        .context("Failed to run database migrations")?;
+    info!("Database migrations applied");
 
     // Initialize Fail-Closed Health Gate
     let health_gate = HealthGate::new(config.max_lag_seconds);

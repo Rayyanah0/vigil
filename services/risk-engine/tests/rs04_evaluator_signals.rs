@@ -7,7 +7,7 @@
 //! 4. Deterministic deduplication key generation.
 //! 5. HF = 1.0 boundary: position remains non-liquidatable.
 
-use common::math::WAD;
+use common::math::WAD_U128 as WAD;
 use risk_engine::engine::evaluator::{evaluate_position, PositionEvaluationInput};
 
 #[test]

@@ -18,6 +18,11 @@ impl Config {
         let database_url = env::var("DATABASE_URL")
             .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/vigil".into());
         let nats_url = env::var("NATS_URL").unwrap_or_else(|_| "nats://localhost:4222".into());
+        let nats_url = if nats_url.contains("://") {
+            nats_url
+        } else {
+            format!("nats://{nats_url}")
+        };
         let http_port = env::var("HTTP_PORT")
             .ok()
             .and_then(|p| p.parse().ok())

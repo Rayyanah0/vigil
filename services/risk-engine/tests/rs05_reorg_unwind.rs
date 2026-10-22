@@ -9,7 +9,7 @@
 //! 6. Replacement fork events with new block hashes are processed cleanly.
 
 use common::events::LiquidationSignal;
-use common::math::WAD;
+use common::math::WAD_U128 as WAD;
 use common::types::Address;
 use risk_engine::db::events::{
     mark_retracted, record_event_if_new, AppliedDelta, EventRecordParams,

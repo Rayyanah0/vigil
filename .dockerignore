@@ -1,0 +1,6 @@
+.git
+services/target
+web/node_modules
+web/dist
+node_modules
+contracts/lib

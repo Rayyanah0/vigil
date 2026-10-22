@@ -1,4 +1,4 @@
--- Migration 0002: Risk Engine Tables and Outbox Schema (RS-04, RS-05, RS-06)
+-- Migration 0003: Risk Engine Tables and Outbox Schema (RS-04, RS-05, RS-06)
 
 -- 1. Deduplication and Reversible Event Ledger
 CREATE TABLE IF NOT EXISTS processed_events (
@@ -70,3 +70,28 @@ BEGIN
         ALTER TABLE positions ADD COLUMN last_index_ray NUMERIC(78, 0) NOT NULL DEFAULT 1000000000000000000000000000;
     END IF;
 END $$;
+
+-- Pre-signed borrower intents are consumed by the Liquidator.
+CREATE TABLE IF NOT EXISTS intents (
+    borrower           TEXT NOT NULL,
+    nonce              TEXT NOT NULL,
+    collateral_asset   TEXT NOT NULL,
+    max_repay          TEXT NOT NULL,
+    min_collateral_out TEXT NOT NULL,
+    deadline           BIGINT NOT NULL,
+    signature          TEXT NOT NULL,
+    PRIMARY KEY (borrower, nonce)
+);
+
+-- Durable Liquidator transaction tracking.
+CREATE TABLE IF NOT EXISTS liquidator_txs (
+    nonce        BIGINT PRIMARY KEY,
+    kind         TEXT NOT NULL,
+    borrower     TEXT NOT NULL,
+    tx_hash      TEXT NOT NULL,
+    max_fee_wei  TEXT NOT NULL,
+    priority_wei TEXT NOT NULL,
+    sent_block   BIGINT NOT NULL,
+    status       TEXT NOT NULL CHECK (status IN ('pending', 'confirmed', 'replaced', 'reorged', 'gap_filled', 'failed')),
+    trace_id     TEXT NOT NULL
+);
