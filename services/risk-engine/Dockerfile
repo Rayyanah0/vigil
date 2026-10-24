@@ -1,7 +1,14 @@
 # --- Builder Stage ---
 FROM rust:1.85-slim-bookworm AS builder
 WORKDIR /src
-COPY . .
+
+# Copy the entire workspace or necessary manifest files first
+COPY Cargo.toml Cargo.lock ./
+COPY services/risk-engine ./services/risk-engine
+# Copy any other dependent services/common modules if your workspace requires them
+COPY services/common ./services/common
+
+WORKDIR /src/services/risk-engine
 RUN cargo build --release -p vigil-risk-engine
 
 # --- Runtime Stage ---
