@@ -2,11 +2,17 @@
 FROM rust:1.85-slim-bookworm AS builder
 WORKDIR /src
 
-# Copy only the Cargo.toml and source files that exist inside the service folder
-COPY services/risk-engine/Cargo.toml ./
-COPY services/risk-engine/src ./src
+# Copy the root workspace manifest
+COPY Cargo.toml ./
 
-RUN cargo build --release
+# Copy dependent workspace modules if they exist
+COPY services/common ./services/common
+
+# Copy the risk engine service folder
+COPY services/risk-engine ./services/risk-engine
+
+# Build specifically the risk engine package from the workspace root
+RUN cargo build --release -p vigil-risk-engine
 
 # --- Runtime Stage ---
 FROM debian:bookworm-slim AS runtime
