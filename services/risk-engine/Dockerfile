@@ -1,21 +1,27 @@
 # --- Builder Stage ---
-FROM rust:1.85-slim-bookworm AS builder
+FROM rust:1.85 AS builder
+
 WORKDIR /app
 
-# Copy the entire workspace repository (root Cargo.toml, common modules, and risk-engine)
-COPY . .
+# Copy the Rust workspace
+COPY vigil/ .
 
-# Build the risk engine package specifically from the workspace
+# Build the risk engine
 RUN cargo build --release -p vigil-risk-engine
 
+
 # --- Runtime Stage ---
-FROM debian:bookworm-slim AS runtime
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates libpq-dev \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the compiled binary from the builder stage
-COPY --from=builder /app/target/release/vigil-risk-engine /usr/local/bin/
+# Copy the compiled binary
+COPY --from=builder /app/target/release/vigil-risk-engine /app/vigil-risk-engine
 
-EXPOSE 8080
-CMD ["vigil-risk-engine"]
+CMD ["./vigil-risk-engine"]
