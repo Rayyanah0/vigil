@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy the entire workspace repository (root Cargo.toml, common modules, and risk-engine)
 COPY . .
 
-# Build the risk engine package specifically from the workspace
+# Build the risk engine package specifically from the workspace root
 RUN cargo build --release -p vigil-risk-engine
 
 # --- Runtime Stage ---
