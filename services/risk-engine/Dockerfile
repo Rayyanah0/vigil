@@ -2,8 +2,8 @@
 FROM rust:1.85-slim-bookworm AS builder
 WORKDIR /src
 
-# Copy the risk engine files from the services directory
-COPY services/risk-engine/Cargo.toml services/risk-engine/Cargo.lock ./
+# Copy only the Cargo.toml and source files that exist inside the service folder
+COPY services/risk-engine/Cargo.toml ./
 COPY services/risk-engine/src ./src
 
 RUN cargo build --release
