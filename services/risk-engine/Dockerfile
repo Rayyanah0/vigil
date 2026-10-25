@@ -1,17 +1,11 @@
 # --- Builder Stage ---
 FROM rust:1.85-slim-bookworm AS builder
-WORKDIR /src
+WORKDIR /app
 
-# Copy the root workspace manifest
-COPY Cargo.toml ./
+# Copy the entire workspace repository (root Cargo.toml, common modules, and risk-engine)
+COPY . .
 
-# Copy dependent workspace modules if they exist
-COPY services/common ./services/common
-
-# Copy the risk engine service folder
-COPY services/risk-engine ./services/risk-engine
-
-# Build specifically the risk engine package from the workspace root
+# Build the risk engine package specifically from the workspace
 RUN cargo build --release -p vigil-risk-engine
 
 # --- Runtime Stage ---
@@ -20,7 +14,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /src/target/release/vigil-risk-engine /usr/local/bin/
+# Copy the compiled binary from the builder stage
+COPY --from=builder /app/target/release/vigil-risk-engine /usr/local/bin/
 
 EXPOSE 8080
 CMD ["vigil-risk-engine"]
